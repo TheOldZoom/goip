@@ -70,16 +70,15 @@ goip
 Example formatted output:
 
 ```text
-IP:        8.8.8.8
+IP:        6.7.6.7
 Country:   United States (US)
-Region:    Virginia (VA)
-City:      Ashburn
-ZIP:       20149
+Region:    Ohio (OH)
+City:      Columbus
+ZIP:       43218
 Timezone:  America/New_York
-ISP:       Google LLC
-Org:       Google Public DNS
-AS:        AS15169 Google LLC
-Coords:    39.0300, -77.5000
+ISP:       CONUS-YPG
+Org:       United States Department of Defense
+Coords:    39.9819, -82.9048
 ```
 
 ### Look up a specific IP or domain name
