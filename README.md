@@ -1,4 +1,4 @@
-# ligoip
+# Goip
 
 A small terminal CLI for checking your public IP address or looking up details about any IP address. It uses `ip-api.com` and can print either a readable summary or raw JSON.
 
