@@ -26,36 +26,33 @@ jobs:
         run: |
           make build-all
 
-      - name: Remove previous latest release
+      - name: Create or move latest tag
         uses: actions/github-script@v7
         with:
           script: |
             try {
-              const release = await github.rest.repos.getReleaseByTag({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                tag: "latest",
-              });
-
-              await github.rest.repos.deleteRelease({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                release_id: release.data.id,
-              });
-            } catch (error) {
-              if (error.status !== 404) {
-                throw error;
-              }
-            }
-
-            try {
-              await github.rest.git.deleteRef({
+              await github.rest.git.getRef({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 ref: "tags/latest",
               });
+
+              await github.rest.git.updateRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: "tags/latest",
+                sha: context.sha,
+                force: true,
+              });
             } catch (error) {
-              if (error.status !== 404) {
+              if (error.status === 404) {
+                await github.rest.git.createRef({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  ref: "refs/tags/latest",
+                  sha: context.sha,
+                });
+              } else {
                 throw error;
               }
             }
@@ -64,7 +61,8 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: latest
-          target_commitish: ${{ github.sha }}
           name: Latest
           generate_release_notes: true
+          overwrite_files: true
+          make_latest: true
           files: build/*
