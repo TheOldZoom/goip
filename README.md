@@ -1,11 +1,11 @@
 # Goip
 
-A small terminal CLI for checking your public IP address or looking up details about any IP address. It uses `ip-api.com` and can print either a readable summary or raw JSON.
+A small terminal CLI for checking your public IP address or looking up details about any IP address or domain name. It uses `ip-api.com` and can print either a readable summary or raw JSON.
 
 ## What you get
 
 - **Check your current public IP** with no arguments
-- **Look up any IP address** from the command line
+- **Look up any IP address or domain name** from the command line
 - **Readable terminal output** for quick inspection
 - **JSON output** for scripts and automation
 - **No API key required**
@@ -82,10 +82,11 @@ AS:        AS15169 Google LLC
 Coords:    39.0300, -77.5000
 ```
 
-### Look up a specific IP
+### Look up a specific IP or domain name
 
 ```bash
 goip 8.8.8.8
+goip example.com
 ```
 
 ### Output JSON
@@ -93,6 +94,7 @@ goip 8.8.8.8
 ```bash
 goip --json
 goip 8.8.8.8 --json
+goip example.com --json
 ```
 
 Example JSON:
@@ -110,7 +112,6 @@ goip --help
 Available flags:
 
 - `--json` - output JSON instead of formatted text
-- `--config <path>` - load a config file from a specific location
 
 ---
 
@@ -118,7 +119,7 @@ Available flags:
 
 - Lookups are powered by `ip-api.com`
 - The tool does not require an account or API key
-- A config file path can be provided, but the CLI currently has no user-facing settings beyond loading that file
+- Supports IPv4, IPv6, and domain-name lookups
 
 ---
 

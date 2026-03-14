@@ -28,13 +28,10 @@ import (
 	"goip/internal/output"
 	"io"
 	"os"
-	"path/filepath"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
-var cfgFile string
 var jsonOutput bool
 
 type errorResponse struct {
@@ -53,10 +50,21 @@ func printJSON(w io.Writer, v any) error {
 }
 
 var rootCmd = &cobra.Command{
-	Use:          "goip",
-	Short:        "A tool to see an IP address & get info about an IP address",
+	Use:       "goip",
+	Short:     "Show your public IP or look up details for any IP address or domain name",
+	ValidArgs: []string{"<ip>"},
+	Long: `goip shows information about your current public IP when run without arguments.
+If you pass an IP address or domain name, it looks up details for that target instead.
+Use --json for machine-readable output.
+Supports both IPv4 and IPv6 addresses, and domain names.`,
+	Example: `goip
+goip 1.1.1.1
+goip --json
+goip 6.7.6.7 --json
+goip example.com
+goip example.com --json`,
 	SilenceErrors: true,
-	SilenceUsage: true,
+	SilenceUsage:  true,
 
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) == 0 {
@@ -121,25 +129,5 @@ func Execute() {
 }
 
 func init() {
-	cobra.OnInitialize(initConfig)
-
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.config/.goip)")
-
 	rootCmd.Flags().BoolVar(&jsonOutput, "json", false, "output JSON")
-}
-
-func initConfig() {
-	if cfgFile != "" {
-		viper.SetConfigFile(cfgFile)
-	} else {
-		configDir, err := os.UserConfigDir()
-		cobra.CheckErr(err)
-		viper.SetConfigFile(filepath.Join(configDir, ".goip"))
-	}
-
-	viper.AutomaticEnv()
-
-	if err := viper.ReadInConfig(); err == nil {
-		fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
-	}
 }
