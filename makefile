@@ -1,0 +1,35 @@
+.PHONY: build install build-all build-linux-amd64 build-linux-arm64 build-darwin-amd64 build-darwin-arm64 build-windows-amd64 build-windows-arm64 clean
+
+BUILD_DIR := build
+
+build:
+	@mkdir -p $(BUILD_DIR) && go build -o $(BUILD_DIR)/goip .
+
+install: build
+	@sudo install -m 755 $(BUILD_DIR)/goip /usr/local/bin/goip
+	@echo "Installed goip to /usr/local/bin/goip"
+
+build-linux-amd64:
+	@mkdir -p $(BUILD_DIR) && GOOS=linux GOARCH=amd64 go build -o $(BUILD_DIR)/goip-linux-amd64 .
+build-linux-arm64:
+	@mkdir -p $(BUILD_DIR) && GOOS=linux GOARCH=arm64 go build -o $(BUILD_DIR)/goip-linux-arm64 .
+
+build-darwin-amd64:
+	@mkdir -p $(BUILD_DIR) && GOOS=darwin GOARCH=amd64 go build -o $(BUILD_DIR)/goip-darwin-amd64 .
+build-darwin-arm64:
+	@mkdir -p $(BUILD_DIR) && GOOS=darwin GOARCH=arm64 go build -o $(BUILD_DIR)/goip-darwin-arm64 .
+
+build-windows-amd64:
+	@mkdir -p $(BUILD_DIR) && GOOS=windows GOARCH=amd64 go build -o $(BUILD_DIR)/goip-windows-amd64.exe .
+build-windows-arm64:
+	@mkdir -p $(BUILD_DIR) && GOOS=windows GOARCH=arm64 go build -o $(BUILD_DIR)/goip-windows-arm64.exe .
+
+
+
+build-all: build-linux-amd64 build-linux-arm64 build-darwin-amd64 build-darwin-arm64 build-windows-amd64 build-windows-arm64
+	@mkdir -p $(BUILD_DIR)
+	@echo "Built all platforms in $(BUILD_DIR)/"
+
+clean:
+	@rm -rf $(BUILD_DIR)
+	@echo "Removed $(BUILD_DIR)/"
