@@ -1,13 +1,15 @@
 .PHONY: build install build-all build-linux-amd64 build-linux-arm64 build-darwin-amd64 build-darwin-arm64 build-windows-amd64 build-windows-arm64 clean
 
 BUILD_DIR := build
+BIN_DIR ?= $(HOME)/.local/bin
 
 build:
 	@mkdir -p $(BUILD_DIR) && go build -o $(BUILD_DIR)/goip .
 
 install: build
-	@sudo install -m 755 $(BUILD_DIR)/goip /usr/local/bin/goip
-	@echo "Installed goip to /usr/local/bin/goip"
+	@mkdir -p $(BIN_DIR)
+	@install -m 755 $(BUILD_DIR)/goip $(BIN_DIR)/goip
+	@echo "Installed goip to $(BIN_DIR)/goip"
 
 build-linux-amd64:
 	@mkdir -p $(BUILD_DIR) && GOOS=linux GOARCH=amd64 go build -o $(BUILD_DIR)/goip-linux-amd64 .

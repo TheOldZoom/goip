@@ -26,6 +26,7 @@ import (
 	"fmt"
 	"goip/internal/ipinfo"
 	"goip/internal/output"
+	"io"
 	"os"
 	"path/filepath"
 
@@ -36,47 +37,79 @@ import (
 var cfgFile string
 var jsonOutput bool
 
-var rootCmd = &cobra.Command{
-	Use:   "goip",
-	Short: "A tool to see an IP address & get info about an IP address",
+type errorResponse struct {
+	Status  string `json:"status"`
+	Message string `json:"message"`
+}
 
-	Run: func(cmd *cobra.Command, args []string) {
+func printJSON(w io.Writer, v any) error {
+	data, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	fmt.Fprintln(w, string(data))
+	return nil
+}
+
+var rootCmd = &cobra.Command{
+	Use:          "goip",
+	Short:        "A tool to see an IP address & get info about an IP address",
+	SilenceErrors: true,
+	SilenceUsage: true,
+
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) == 0 {
 			ip, err := ipinfo.GetMyIP()
 			if err != nil {
-				fmt.Fprintln(os.Stderr, err)
-				return
-			}
-			if jsonOutput {
-				json, err := json.Marshal(ip)
-				if err != nil {
-					fmt.Fprintln(os.Stderr, err)
-					return
+				if jsonOutput && ip.Status != "" {
+					if jsonErr := printJSON(os.Stderr, ip); jsonErr == nil {
+						return err
+					}
+				} else if jsonOutput {
+					if jsonErr := printJSON(os.Stderr, errorResponse{Status: "fail", Message: err.Error()}); jsonErr == nil {
+						return err
+					}
 				}
-				fmt.Println(string(json))
-				return
+				fmt.Fprintln(os.Stderr, err)
+				return err
+			}
+
+			if jsonOutput {
+				if err := printJSON(os.Stdout, ip); err != nil {
+					fmt.Fprintln(os.Stderr, err)
+					return err
+				}
+				return nil
 			}
 			fmt.Println(output.FormatIPInfo(ip))
-			return
+			return nil
 		}
-
 		ip := args[0]
 		info, err := ipinfo.GetIPInfo(ip)
 		if err != nil {
+			if jsonOutput && info.Status != "" {
+				if jsonErr := printJSON(os.Stderr, info); jsonErr == nil {
+					return err
+				}
+			} else if jsonOutput {
+				if jsonErr := printJSON(os.Stderr, errorResponse{Status: "fail", Message: err.Error()}); jsonErr == nil {
+					return err
+				}
+			}
 			fmt.Fprintln(os.Stderr, err)
-			return
+			return err
 		}
 		if jsonOutput {
-			json, err := json.Marshal(info)
-			if err != nil {
+			if err := printJSON(os.Stdout, info); err != nil {
 				fmt.Fprintln(os.Stderr, err)
-				return
+				return err
 			}
-			fmt.Println(string(json))
-			return
+			return nil
 		}
 		fmt.Println(output.FormatIPInfo(info))
 
+		return nil
 	},
 }
 

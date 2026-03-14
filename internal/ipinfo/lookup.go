@@ -73,7 +73,7 @@ func GetIPInfo(ip string) (LookupResponse, error) {
 		if info.Message == "" {
 			info.Message = "lookup failed"
 		}
-		return LookupResponse{}, errors.New(info.Message)
+		return info, errors.New(info.Message)
 	}
 
 	return info, nil
