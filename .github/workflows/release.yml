@@ -26,43 +26,20 @@ jobs:
         run: |
           make build-all
 
-      - name: Create or move latest tag
-        uses: actions/github-script@v7
-        with:
-          script: |
-            try {
-              await github.rest.git.getRef({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                ref: "tags/latest",
-              });
+      - name: Compute release metadata
+        id: release_meta
+        run: |
+          timestamp="$(date -u +%Y%m%d-%H%M%S)"
+          short_sha="${GITHUB_SHA::7}"
+          echo "tag=build-${timestamp}-${short_sha}" >> "$GITHUB_OUTPUT"
+          echo "name=Build ${timestamp} (${short_sha})" >> "$GITHUB_OUTPUT"
 
-              await github.rest.git.updateRef({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                ref: "tags/latest",
-                sha: context.sha,
-                force: true,
-              });
-            } catch (error) {
-              if (error.status === 404) {
-                await github.rest.git.createRef({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  ref: "refs/tags/latest",
-                  sha: context.sha,
-                });
-              } else {
-                throw error;
-              }
-            }
-
-      - name: Publish latest release
+      - name: Publish release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: latest
-          name: Latest
+          tag_name: ${{ steps.release_meta.outputs.tag }}
+          target_commitish: ${{ github.sha }}
+          name: ${{ steps.release_meta.outputs.name }}
           generate_release_notes: true
-          overwrite_files: true
           make_latest: true
           files: build/*
