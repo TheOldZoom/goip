@@ -22,6 +22,7 @@ THE SOFTWARE.
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"goip/internal/ipinfo"
 	"goip/internal/output"
@@ -33,6 +34,7 @@ import (
 )
 
 var cfgFile string
+var jsonOutput bool
 
 var rootCmd = &cobra.Command{
 	Use:   "goip",
@@ -45,6 +47,15 @@ var rootCmd = &cobra.Command{
 				fmt.Fprintln(os.Stderr, err)
 				return
 			}
+			if jsonOutput {
+				json, err := json.Marshal(ip)
+				if err != nil {
+					fmt.Fprintln(os.Stderr, err)
+					return
+				}
+				fmt.Println(string(json))
+				return
+			}
 			fmt.Println(output.FormatIPInfo(ip))
 			return
 		}
@@ -55,7 +66,15 @@ var rootCmd = &cobra.Command{
 			fmt.Fprintln(os.Stderr, err)
 			return
 		}
-
+		if jsonOutput {
+			json, err := json.Marshal(info)
+			if err != nil {
+				fmt.Fprintln(os.Stderr, err)
+				return
+			}
+			fmt.Println(string(json))
+			return
+		}
 		fmt.Println(output.FormatIPInfo(info))
 
 	},
@@ -73,7 +92,7 @@ func init() {
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.config/.goip)")
 
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	rootCmd.Flags().BoolVar(&jsonOutput, "json", false, "output JSON")
 }
 
 func initConfig() {
